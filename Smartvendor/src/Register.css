@@ -1,0 +1,103 @@
+/* Full page background */
+.register-container {
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(
+      rgba(0, 0, 0, 0.55),
+      rgba(0, 0, 0, 0.55)
+    ),
+    url("https://images.unsplash.com/photo-1521791136064-7986c2920216");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Register card */
+.register-box {
+  width: 400px;
+  background: #ffffff;
+  padding: 40px 35px;
+  border-radius: 14px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  animation: slideUp 0.8s ease-in-out;
+}
+
+/* Heading */
+.register-box h2 {
+  margin-bottom: 30px;
+  font-size: 28px;
+  font-weight: 600;
+  color: #2a5298;
+}
+
+/* Inputs */
+.register-box input,
+.register-box select {
+  width: 75%;
+  padding: 12px 5px;
+  margin-bottom: 19px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.register-box input:focus,
+.register-box select:focus {
+  border-color: #2a5298;
+  box-shadow: 0 0 6px rgba(42, 82, 152, 0.35);
+}
+
+/* Button */
+.register-box button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #2a5298, #1e3c72);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.register-box button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(30, 60, 114, 0.45);
+}
+
+/* Footer text */
+.register-box p {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.register-box a {
+  color: #2a5298;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.register-box a:hover {
+  text-decoration: underline;
+}
+
+/* Animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
