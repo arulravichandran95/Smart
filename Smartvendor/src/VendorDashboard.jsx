@@ -1,101 +1,284 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import "./VendorDashboard.css";
 
 export default function VendorDashboard() {
+  const [activeTab, setActiveTab] = useState("submit");
+
   const [productName, setProductName] = useState("");
   const [category, setCategory] = useState("");
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 🔐 GET STORED LOGIN DETAILS
+  const [statusList, setStatusList] = useState([]);
+  const [historyList, setHistoryList] = useState([]);
+
+  const [editingId, setEditingId] = useState(null);
+
   const username = localStorage.getItem("username");
   const password = localStorage.getItem("password");
 
+  /* ================= SUBMIT / UPDATE ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!username || !password) {
-      alert("Session expired. Please login again.");
-      return;
-    }
+    const payload = {
+      productName,
+      category,
+      quantity: Number(quantity),
+      price: Number(price)
+    };
+
+    setIsSubmitting(true);
 
     try {
-      await axios.post(
-        "http://localhost:8080/api/vendor/submit",
-        {
-          productName,
-          category,
-          quantity,
-          price
-        },
-        {
-          auth: {
-            username: username,
-            password: password
-          }
-        }
-      );
+      if (editingId) {
+        await axios.put(
+          `http://localhost:8080/api/vendor/update/${editingId}`,
+          payload,
+          { auth: { username, password } }
+        );
+        alert("Updated successfully");
+      } else {
+        await axios.post(
+          "http://localhost:8080/api/vendor/submit",
+          payload,
+          { auth: { username, password } }
+        );
+        alert("Submitted successfully");
+      }
 
-      alert("Procurement Request Submitted Successfully!");
-
-      // Clear form
-      setProductName("");
-      setCategory("");
-      setQuantity("");
-      setPrice("");
-
-    } catch (error) {
-      console.error(error);
-      alert("Submission failed!");
+      resetForm();
+      fetchHistory();
+    } catch {
+      alert("Submission failed");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  const resetForm = () => {
+    setProductName("");
+    setCategory("");
+    setQuantity("");
+    setPrice("");
+    setEditingId(null);
+  };
+
+  /* ================= FETCH STATUS ================= */
+  const fetchStatus = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:8080/api/vendor/status",
+        { auth: { username, password } }
+      );
+      setStatusList(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /* ================= FETCH MY SUBMISSIONS ================= */
+  const fetchHistory = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:8080/api/vendor/history",
+        { auth: { username, password } }
+      );
+      setHistoryList(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /* ================= EDIT ================= */
+  const handleEdit = (item) => {
+    setProductName(item.productName);
+    setCategory(item.category);
+    setQuantity(item.quantity);
+    setPrice(item.price);
+    setEditingId(item.id);
+    setActiveTab("submit");
+  };
+
+  /* ================= DELETE ================= */
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this submission?")) return;
+
+    try {
+      await axios.delete(
+        `http://localhost:8080/api/vendor/delete/${id}`,
+        { auth: { username, password } }
+      );
+      fetchHistory();
+    } catch {
+      alert("Delete failed");
+    }
+  };
+
+  /* ================= TAB EFFECT ================= */
+  useEffect(() => {
+    if (activeTab === "status") fetchStatus();
+    if (activeTab === "history") fetchHistory();
+  }, [activeTab]);
+
   return (
-    <div className="vendor-container">
-      <form onSubmit={handleSubmit} className="vendor-form">
-        <h2 className="vendor-title">Vendor Dashboard</h2>
+    <div className="vendor-layout">
 
-        <input
-          className="vendor-input"
-          type="text"
-          placeholder="Product Name"
-          value={productName}
-          onChange={(e) => setProductName(e.target.value)}
-          required
-        />
+      {/* ===== SIDEBAR ===== */}
+      <div className="vendor-sidebar">
+        <h2 className="sidebar-title">Vendor</h2>
 
-        <input
-          className="vendor-input"
-          type="text"
-          placeholder="Category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          required
-        />
-
-        <input
-          className="vendor-input"
-          type="number"
-          placeholder="Quantity"
-          value={quantity}
-          onChange={(e) => setQuantity(e.target.value)}
-          required
-        />
-
-        <input
-          className="vendor-input"
-          type="number"
-          placeholder="Price"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          required
-        />
-
-        <button className="vendor-btn" type="submit">
-          Submit Request
+        <button
+          className={`sidebar-btn ${activeTab === "submit" ? "active" : ""}`}
+          onClick={() => setActiveTab("submit")}
+        >
+          Product Submission
+          
         </button>
-      </form>
+
+        <button
+          className={`sidebar-btn ${activeTab === "status" ? "active" : ""}`}
+          onClick={() => setActiveTab("status")}
+        >
+          Status
+        </button>
+
+        <button
+          className={`sidebar-btn ${activeTab === "history" ? "active" : ""}`}
+          onClick={() => setActiveTab("history")}
+        >
+          My Submissions
+        </button>
+      </div>
+
+      {/* ===== CONTENT ===== */}
+      <div className="vendor-content">
+
+        {/* ===== FORM ===== */}
+        {activeTab === "submit" && (
+          <form onSubmit={handleSubmit} className="vendor-form">
+            <h2 className="vendor-title">
+              {editingId ? "Edit Submission" : "Product Submission"}
+            </h2>
+            <p className="vendor-description">
+     Your product will be approved instantly when Quantity is greater than 3 and Price is less than 30000!!.
+    </p>
+
+
+            <input
+  className="vendor-input"
+  type="text"
+  placeholder="Product Name"
+  value={productName ?? ""}
+  onChange={(e) => setProductName(e.target.value)}
+  required
+/>
+
+<input
+  className="vendor-input"
+  type="text"
+  placeholder="Category"
+  value={category ?? ""}
+  onChange={(e) => setCategory(e.target.value)}
+  required
+/>
+
+<input
+  className="vendor-input"
+  type="number"
+  placeholder="Quantity"
+  value={quantity ?? ""}
+  onChange={(e) => setQuantity(e.target.value)}
+  required
+/>
+
+<input
+  className="vendor-input"
+  type="number"
+  placeholder="Price"
+  value={price ?? ""}
+  onChange={(e) => setPrice(e.target.value)}
+  required
+/>
+
+       <button className="vendor-btn" disabled={isSubmitting}>
+              {editingId ? "Update" : "Submit"}
+            </button>
+          </form>
+        )}
+
+        {/* ===== STATUS (UNCHANGED) ===== */}
+        {activeTab === "status" && (
+          <div className="status-box">
+            <h2>Product Status</h2>
+            <table className="status-table">
+              <thead>
+                <tr>
+                  <th>Product</th><th>Category</th><th>Qty</th>
+                  <th>Price</th><th>Status</th><th>Reason</th>
+
+                </tr>
+              </thead>
+              <tbody>
+                {statusList.map(item => (
+                  <tr key={item.id}>
+                    <td>{item.productName}</td>
+                    <td>{item.category}</td>
+                    <td>{item.quantity}</td>
+                    <td>{item.price}</td>
+                    <td><span className={`status ${item.status.toLowerCase()}`}>{item.status}</span></td>
+                    <td>
+                        {item.status === "REJECTED" ? item.rejectionReason: "-"}</td>
+
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* ===== MY SUBMISSIONS ===== */}
+        {activeTab === "history" && (
+          <div className="status-box">
+            <h2>My Submissions</h2>
+
+            <table className="status-table">
+              <thead>
+                <tr>
+                  <th>Product</th><th>Category</th><th>Qty</th>
+                  <th>Price</th><th>Status</th><th>Edit</th><th>Delete</th>
+                </tr>
+              </thead>
+              <tbody>
+                {historyList.length === 0 ? (
+                  <tr><td colSpan="7">No submissions available</td></tr>
+                ) : (
+                  historyList.map(item => (
+                    <tr key={item.id}>
+                      <td>{item.productName}</td>
+                      <td>{item.category}</td>
+                      <td>{item.quantity}</td>
+                      <td>{item.price}</td>
+                      <td>{item.status}</td>
+                      <td>
+                        {item.status === "PENDING" &&
+                          <button onClick={() => handleEdit(item)}>Edit</button>}
+                      </td>
+                      <td>
+                        {item.status === "PENDING" &&
+                          <button onClick={() => handleDelete(item.id)}>🗑</button>}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+      </div>
     </div>
   );
 }

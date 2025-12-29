@@ -32,6 +32,9 @@ export default function Login() {
  
         return ( 
         <div className="login-container"> 
+          <video className="bg-video" autoPlay muted loop playsInline>
+      <source src="/videos/admin-bg.mp4" type="video/mp4" />
+    </video>
         <form onSubmit={handleLogin} className="login-box"> 
           <h2>Login</h2> 
           <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required /> 

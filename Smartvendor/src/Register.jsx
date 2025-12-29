@@ -10,20 +10,32 @@ export default function Register() {
 
   const navigate = useNavigate();
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleRegister = async (e) => {
     e.preventDefault();
+    console.log("handleRegister called", { username, password, role });
+    setIsSubmitting(true);
 
     try {
-      await axios.post("http://localhost:8080/api/auth/register", {
+      const resp = await axios.post("http://localhost:8080/api/auth/register", {
         username,
         password,
         role,
       });
 
+      console.log("register response:", resp);
       alert("Registration successful");
       navigate("/");
     } catch (error) {
-      alert("Registration failed");
+      console.error("register error:", error);
+      if (error.response) {
+        alert("Registration failed: " + (error.response.data?.message || error.response.status));
+      } else {
+        alert("Registration failed: " + error.message);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -48,9 +60,9 @@ export default function Register() {
           required
         />
 
-
-
-        <button type="submit">Register</button>
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Registering..." : "Register"}
+        </button>
       </form>
     </div>
   );
