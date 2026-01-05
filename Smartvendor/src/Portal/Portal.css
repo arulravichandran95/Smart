@@ -1,0 +1,134 @@
+/* ===== BASE ===== */
+.portal-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ===== HEADER ===== */
+.portal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 48px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  background-color: #1e293b;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+  color: #dee8e5;
+}
+
+/* ===== NAV LINKS ===== */
+.nav-links {
+  display: flex;
+  gap: 24px;
+}
+
+.nav-links a,
+.nav-link {
+  text-decoration: none;
+  color: #dce5e3;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.nav-links a:hover,
+.nav-link:hover {
+  color: #0f766e;
+}
+
+/* ===== NAV BUTTON ===== */
+.nav-btn {
+  background: #0f766e;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* ===== HERO SECTION ===== */
+.hero {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 60px 80px;
+  gap: 40px;
+}
+
+/* ===== HERO TEXT CARD ===== */
+.hero-text {
+  max-width: 520px;
+  background: #ffffff;
+  padding: 22px 26px;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-left: 6px solid #0f766e;
+}
+
+.hero-text h1 {
+  font-size: 40px;
+  color: #0f3d2e;
+  margin-bottom: 16px;
+}
+
+.hero-text span {
+  font-weight: 600;
+}
+
+.hero-description p {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: #374151;
+}
+
+/* ===== HERO ACTIONS ===== */
+.hero-actions {
+  margin-top: 28px;
+  display: flex;
+  gap: 16px;
+}
+
+.primary-btn {
+  background: #0f766e;
+  color: white;
+  padding: 12px 22px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondary-btn {
+  background: white;
+  color: #0f766e;
+  border: 2px solid #0f766e;
+  padding: 12px 22px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ===== HERO IMAGE ===== */
+.hero-image img {
+  max-width: 520px;
+  border-radius: 10px;
+}
+
+/* ===== FOOTER ===== */
+.portal-footer {
+  text-align: center;
+  padding: 14px;
+  font-size: 14px;
+  color: #eceff3;
+  border-top: 1px solid #e5e7eb;
+  background-color: #1e293b;
+}

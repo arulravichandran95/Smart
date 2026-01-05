@@ -1,6 +1,7 @@
 import { useState } from "react"; 
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; import "./Login.css"; 
+import axios from "axios";
+import "./Login.css"; 
 export default function Login() { 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState(""); const navigate = useNavigate(); 
@@ -16,8 +17,9 @@ export default function Login() {
     const role = response.data.role;
 
     // 🔐 STORE LOGIN DATA
-    localStorage.setItem("username", username);
-    localStorage.setItem("password", password);
+   localStorage.setItem("token", response.data.token);
+   localStorage.setItem("role", response.data.role);
+
    
     if (role === "ROLE_ADMIN") {
       navigate("/admin/dashboard");
