@@ -2,6 +2,19 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "./AdminDashboard.css";
 
+/* ================= AXIOS JWT INSTANCE ================= */
+const api = axios.create({
+  baseURL: "http://localhost:8080",
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("pending");
   const [pendingList, setPendingList] = useState([]);
@@ -9,55 +22,39 @@ export default function AdminDashboard() {
   const [rejectingId, setRejectingId] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
 
-
-  const username = localStorage.getItem("username");
-  const password = localStorage.getItem("password");
+  /* ===== ACTIONS ===== */
   const approveRequest = async (id) => {
-  await axios.put(
-    `http://localhost:8080/api/admin/approve/${id}`,
-    {},
-    { auth: { username, password } }
-  );
-  fetchPending();
-  fetchApproved();
-};
+    await api.put(`/api/admin/approve/${id}`);
+    fetchPending();
+    fetchApproved();
+  };
 
-const rejectRequest = async (id) => {
-  if (!rejectReason.trim()) {
-    alert("Please enter rejection reason");
-    return;
-  }
-
-  await axios.put(
-    `http://localhost:8080/api/admin/reject/${id}`,
-    rejectReason,
-    {
-      auth: { username, password },
-      headers: { "Content-Type": "text/plain" }
+  const rejectRequest = async (id) => {
+    if (!rejectReason.trim()) {
+      alert("Please enter rejection reason");
+      return;
     }
-  );
 
-  setRejectingId(null);
-  setRejectReason("");
-  fetchPending();
-  fetchApproved();
-};
+    await api.put(
+      `/api/admin/reject/${id}`,
+      rejectReason,
+      { headers: { "Content-Type": "text/plain" } }
+    );
 
+    setRejectingId(null);
+    setRejectReason("");
+    fetchPending();
+    fetchApproved();
+  };
 
   /* ===== FETCH DATA ===== */
   const fetchPending = async () => {
-    const res = await axios.get(
-      "http://localhost:8080/api/admin/pending",
-      { auth: { username, password } }
-    );
+    const res = await api.get("/api/admin/pending");
     setPendingList(res.data);
   };
 
   const fetchApproved = async () => {
-    const res = await axios.get(
-      "http://localhost:8080/api/admin/approved",
-      { auth: { username, password } }
-    );
+    const res = await api.get("/api/admin/approved");
     setApprovedList(res.data);
   };
 
@@ -68,8 +65,6 @@ const rejectRequest = async (id) => {
 
   return (
     <div className="admin-layout">
-      
-
       {/* ===== SIDEBAR ===== */}
       <div className="admin-sidebar">
         <h2 className="admin-title">Admin</h2>
@@ -78,28 +73,26 @@ const rejectRequest = async (id) => {
           className={`admin-btn pending ${activeTab === "pending" ? "active" : ""}`}
           onClick={() => setActiveTab("pending")}
         >
-           Pending Requests
+          Pending Requests
         </button>
 
         <button
           className={`admin-btn approved ${activeTab === "approved" ? "active" : ""}`}
           onClick={() => setActiveTab("approved")}
         >
-           Approved Requests
+          Approved Requests
         </button>
       </div>
 
       {/* ===== CONTENT ===== */}
       <div className="admin-content">
-
-        {/* ===== PENDING ===== */}
         {activeTab === "pending" && (
           <>
             <h2 className="section-title pending-text">Pending Requests</h2>
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Vendor Username</th>
+                  <th>Vendor</th>
                   <th>Product</th>
                   <th>Category</th>
                   <th>Qty</th>
@@ -116,25 +109,23 @@ const rejectRequest = async (id) => {
                     <td>{item.category}</td>
                     <td>{item.quantity}</td>
                     <td>{item.price}</td>
+                    <td><span className="badge pending">PENDING</span></td>
                     <td>
-                      <span className="badge pending">PENDING</span>
-                    </td>
-                    <td>
-                      <button className="action-btn approve"onClick={() => approveRequest(item.id)} >Approve</button>
+                      <button className="action-btn approve" onClick={() => approveRequest(item.id)}>Approve</button>
+                      <button className="action-btn reject" onClick={() => setRejectingId(item.id)}>Reject</button>
 
-                     <button className="action-btn reject"onClick={() => setRejectingId(item.id)}>Reject</button>
                       {rejectingId === item.id && (
-                       <div className="reject-box">
-                      <input type="text"
-                          placeholder="Rejection reason"
-                          value={rejectReason}
-                           onChange={(e) => setRejectReason(e.target.value)} />
-                       <button className="confirm-btn" onClick={() => rejectRequest(item.id)}>Confirm</button>
-                       </div>)}
-                       </td>
-                       <td>
-</td>
-
+                        <div className="reject-box">
+                          <input
+                            type="text"
+                            placeholder="Rejection reason"
+                            value={rejectReason}
+                            onChange={(e) => setRejectReason(e.target.value)}
+                          />
+                          <button onClick={() => rejectRequest(item.id)}>Confirm</button>
+                        </div>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -142,20 +133,18 @@ const rejectRequest = async (id) => {
           </>
         )}
 
-        {/* ===== APPROVED ===== */}
         {activeTab === "approved" && (
           <>
             <h2 className="section-title approved-text">Approved Requests</h2>
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Vendor Username</th>
+                  <th>Vendor</th>
                   <th>Product</th>
                   <th>Category</th>
                   <th>Qty</th>
                   <th>Price</th>
                   <th>Status</th>
-                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -166,40 +155,13 @@ const rejectRequest = async (id) => {
                     <td>{item.category}</td>
                     <td>{item.quantity}</td>
                     <td>{item.price}</td>
-                    <td>
-  <button
-    className="action-btn reject"
-    onClick={() => setRejectingId(item.id)}
-  >
-    Reject
-  </button>
-
-  {rejectingId === item.id && (
-    <div className="reject-box">
-      <input
-        type="text"
-        placeholder="Rejection reason"
-        value={rejectReason}
-        onChange={(e) => setRejectReason(e.target.value)}
-      />
-      <button onClick={() => rejectRequest(item.id)}>
-        Confirm
-      </button>
-    </div>
-  )}
-</td>
-
-      
-                    <td>
-                      <span className="badge approved">APPROVED</span>
-                    </td>
+                    <td><span className="badge approved">APPROVED</span></td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </>
         )}
-
       </div>
     </div>
   );

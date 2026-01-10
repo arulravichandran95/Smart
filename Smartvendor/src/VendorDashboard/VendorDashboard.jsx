@@ -2,6 +2,19 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "./VendorDashboard.css";
 
+const api = axios.create({
+  baseURL: "http://localhost:8080",
+});
+
+// 🔐 Attach JWT automatically
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export default function VendorDashboard() {
   const [activeTab, setActiveTab] = useState("submit");
 
@@ -13,13 +26,8 @@ export default function VendorDashboard() {
 
   const [statusList, setStatusList] = useState([]);
   const [historyList, setHistoryList] = useState([]);
-
   const [editingId, setEditingId] = useState(null);
 
-  const username = localStorage.getItem("username");
-  const password = localStorage.getItem("password");
-
-  /* ================= SUBMIT / UPDATE ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -27,31 +35,23 @@ export default function VendorDashboard() {
       productName,
       category,
       quantity: Number(quantity),
-      price: Number(price)
+      price: Number(price),
     };
 
     setIsSubmitting(true);
 
     try {
       if (editingId) {
-        await axios.put(
-          `http://localhost:8080/api/vendor/update/${editingId}`,
-          payload,
-          { auth: { username, password } }
-        );
+        await api.put(`/api/vendor/update/${editingId}`, payload);
         alert("Updated successfully");
       } else {
-        await axios.post(
-          "http://localhost:8080/api/vendor/submit",
-          payload,
-          { auth: { username, password } }
-        );
+        await api.post("/api/vendor/submit", payload);
         alert("Submitted successfully");
       }
 
       resetForm();
       fetchHistory();
-    } catch {
+    } catch (err) {
       alert("Submission failed");
     } finally {
       setIsSubmitting(false);
@@ -66,33 +66,16 @@ export default function VendorDashboard() {
     setEditingId(null);
   };
 
-  /* ================= FETCH STATUS ================= */
   const fetchStatus = async () => {
-    try {
-      const res = await axios.get(
-        "http://localhost:8080/api/vendor/status",
-        { auth: { username, password } }
-      );
-      setStatusList(res.data);
-    } catch (err) {
-      console.error(err);
-    }
+    const res = await api.get("/api/vendor/status");
+    setStatusList(res.data);
   };
 
-  /* ================= FETCH MY SUBMISSIONS ================= */
   const fetchHistory = async () => {
-    try {
-      const res = await axios.get(
-        "http://localhost:8080/api/vendor/history",
-        { auth: { username, password } }
-      );
-      setHistoryList(res.data);
-    } catch (err) {
-      console.error(err);
-    }
+    const res = await api.get("/api/vendor/history");
+    setHistoryList(res.data);
   };
 
-  /* ================= EDIT ================= */
   const handleEdit = (item) => {
     setProductName(item.productName);
     setCategory(item.category);
@@ -102,22 +85,12 @@ export default function VendorDashboard() {
     setActiveTab("submit");
   };
 
-  /* ================= DELETE ================= */
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this submission?")) return;
-
-    try {
-      await axios.delete(
-        `http://localhost:8080/api/vendor/delete/${id}`,
-        { auth: { username, password } }
-      );
-      fetchHistory();
-    } catch {
-      alert("Delete failed");
-    }
+    await api.delete(`/api/vendor/delete/${id}`);
+    fetchHistory();
   };
 
-  /* ================= TAB EFFECT ================= */
   useEffect(() => {
     if (activeTab === "status") fetchStatus();
     if (activeTab === "history") fetchHistory();
@@ -125,7 +98,6 @@ export default function VendorDashboard() {
 
   return (
     <div className="vendor-layout">
-
       {/* ===== SIDEBAR ===== */}
       <div className="vendor-sidebar">
         <h2 className="sidebar-title">Vendor</h2>
@@ -135,7 +107,6 @@ export default function VendorDashboard() {
           onClick={() => setActiveTab("submit")}
         >
           Product Submission
-          
         </button>
 
         <button
@@ -155,83 +126,85 @@ export default function VendorDashboard() {
 
       {/* ===== CONTENT ===== */}
       <div className="vendor-content">
-
-        {/* ===== FORM ===== */}
         {activeTab === "submit" && (
           <form onSubmit={handleSubmit} className="vendor-form">
             <h2 className="vendor-title">
               {editingId ? "Edit Submission" : "Product Submission"}
             </h2>
-            <p className="vendor-description">
-     Your product will be approved instantly when Quantity is greater than 3 and Price is less than 30000!!.
-    </p>
 
+            <p className="vendor-description">
+              Auto-approved if Quantity ≥ 3 and Price ≤ 30000
+            </p>
 
             <input
-  className="vendor-input"
-  type="text"
-  placeholder="Product Name"
-  value={productName ?? ""}
-  onChange={(e) => setProductName(e.target.value)}
-  required
-/>
+              className="vendor-input"
+              type="text"
+              placeholder="Product Name"
+              value={productName}
+              onChange={(e) => setProductName(e.target.value)}
+              required
+            />
 
-<input
-  className="vendor-input"
-  type="text"
-  placeholder="Category"
-  value={category ?? ""}
-  onChange={(e) => setCategory(e.target.value)}
-  required
-/>
+            <input
+              className="vendor-input"
+              type="text"
+              placeholder="Category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              required
+            />
 
-<input
-  className="vendor-input"
-  type="number"
-  placeholder="Quantity"
-  value={quantity ?? ""}
-  onChange={(e) => setQuantity(e.target.value)}
-  required
-/>
+            <input
+              className="vendor-input"
+              type="number"
+              placeholder="Quantity"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              required
+            />
 
-<input
-  className="vendor-input"
-  type="number"
-  placeholder="Price"
-  value={price ?? ""}
-  onChange={(e) => setPrice(e.target.value)}
-  required
-/>
+            <input
+              className="vendor-input"
+              type="number"
+              placeholder="Price"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              required
+            />
 
-       <button className="vendor-btn" disabled={isSubmitting}>
+            <button className="vendor-btn" disabled={isSubmitting}>
               {editingId ? "Update" : "Submit"}
             </button>
           </form>
         )}
 
-        {/* ===== STATUS (UNCHANGED) ===== */}
         {activeTab === "status" && (
           <div className="status-box">
             <h2>Product Status</h2>
             <table className="status-table">
               <thead>
                 <tr>
-                  <th>Product</th><th>Category</th><th>Qty</th>
-                  <th>Price</th><th>Status</th><th>Reason</th>
-
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Qty</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>Reason</th>
                 </tr>
               </thead>
               <tbody>
-                {statusList.map(item => (
+                {statusList.map((item) => (
                   <tr key={item.id}>
                     <td>{item.productName}</td>
                     <td>{item.category}</td>
                     <td>{item.quantity}</td>
                     <td>{item.price}</td>
-                    <td><span className={`status ${item.status.toLowerCase()}`}>{item.status}</span></td>
                     <td>
-                        {item.status === "REJECTED" ? item.rejectionReason: "-"}</td>
-
+                      <span className={`status ${item.status.toLowerCase()}`}>
+                        {item.status}
+                      </span>
+                    </td>
+                    <td>{item.rejectionReason || "-"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -239,23 +212,28 @@ export default function VendorDashboard() {
           </div>
         )}
 
-        {/* ===== MY SUBMISSIONS ===== */}
         {activeTab === "history" && (
           <div className="status-box">
             <h2>My Submissions</h2>
-
             <table className="status-table">
               <thead>
                 <tr>
-                  <th>Product</th><th>Category</th><th>Qty</th>
-                  <th>Price</th><th>Status</th><th>Edit</th><th>Delete</th>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Qty</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>Edit</th>
+                  <th>Delete</th>
                 </tr>
               </thead>
               <tbody>
                 {historyList.length === 0 ? (
-                  <tr><td colSpan="7">No submissions available</td></tr>
+                  <tr>
+                    <td colSpan="7">No submissions available</td>
+                  </tr>
                 ) : (
-                  historyList.map(item => (
+                  historyList.map((item) => (
                     <tr key={item.id}>
                       <td>{item.productName}</td>
                       <td>{item.category}</td>
@@ -263,12 +241,16 @@ export default function VendorDashboard() {
                       <td>{item.price}</td>
                       <td>{item.status}</td>
                       <td>
-                        {item.status === "PENDING" &&
-                          <button onClick={() => handleEdit(item)}>Edit</button>}
+                        {item.status === "PENDING" && (
+                          <button onClick={() => handleEdit(item)}>Edit</button>
+                        )}
                       </td>
                       <td>
-                        {item.status === "PENDING" &&
-                          <button onClick={() => handleDelete(item.id)}>🗑</button>}
+                        {item.status === "PENDING" && (
+                          <button onClick={() => handleDelete(item.id)}>
+                            🗑
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))
@@ -277,7 +259,6 @@ export default function VendorDashboard() {
             </table>
           </div>
         )}
-
       </div>
     </div>
   );

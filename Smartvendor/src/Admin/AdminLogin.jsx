@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../VendorLogin/Login.css";   // reuse same styling
+import "../VendorLogin/Login.css"; // reuse same styling
 
 export default function AdminLogin() {
   const [username, setUsername] = useState("");
@@ -12,26 +12,27 @@ export default function AdminLogin() {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
+      const res = await axios.post(
         "http://localhost:8080/api/auth/login",
         { username, password }
       );
 
-      const role = response.data.role;
+      const { token, role } = res.data;
 
       if (role !== "ROLE_ADMIN") {
         alert("Access denied. Admin only.");
         return;
       }
 
-      // store credentials
-      localStorage.setItem("username", username);
-      localStorage.setItem("password", password);
+      // ✅ STORE JWT (NOT PASSWORD)
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", role);
 
       navigate("/admin/dashboard");
 
-    } catch (error) {
+    } catch (err) {
       alert("Invalid admin credentials");
+      console.error(err);
     }
   };
 
