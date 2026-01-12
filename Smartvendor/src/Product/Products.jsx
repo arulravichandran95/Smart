@@ -7,7 +7,7 @@ export default function Products() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8080/api/portal/products")
+      .get("https://smart-backends.onrender.com/api/portal/products")
       .then(res => setProducts(res.data))
       .catch(err => console.error(err));
   }, []);

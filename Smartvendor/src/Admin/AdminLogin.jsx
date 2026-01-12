@@ -13,7 +13,7 @@ export default function AdminLogin() {
 
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/auth/login",
+        "https:smart-backends.onrender.com/api/auth/login",
         { username, password }
       );
 

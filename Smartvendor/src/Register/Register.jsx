@@ -18,7 +18,7 @@ export default function Register() {
     setIsSubmitting(true);
 
     try {
-      const resp = await axios.post("http://localhost:8080/api/auth/register", {
+      const resp = await axios.post("https://smart-backends.onrender.com/api/auth/register", {
         username,
         password,
         role,

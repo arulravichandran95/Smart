@@ -3,7 +3,7 @@ import axios from "axios";
 import "./VendorDashboard.css";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: "https:smart-backends.onrender.com",
 });
 
 // 🔐 Attach JWT automatically
