@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import axios from "axios";
+import api from "../api/axiosConfig";
 import "./ChatBot.css";
 
 export default function ChatBot({ onClose }) {
@@ -27,7 +27,7 @@ export default function ChatBot({ onClose }) {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:8080/api/chat", {
+      const res = await api.post("/api/chat", {
         message: userText
       });
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import "./Register.css"; // reuse same styling
 
@@ -18,7 +18,7 @@ export default function Register() {
     setIsSubmitting(true);
 
     try {
-      const resp = await axios.post("https://smart-backends.onrender.com/api/auth/register", {
+      const resp = await api.post("/api/auth/register", {
         username,
         password,
         role,

@@ -2,18 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "./AdminDashboard.css";
 
-/* ================= AXIOS JWT INSTANCE ================= */
-const api = axios.create({
-  baseURL: "http://localhost:8080",
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+import api from "../api/axiosConfig";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("pending");

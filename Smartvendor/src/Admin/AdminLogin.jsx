@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api/axiosConfig";
 import "../VendorLogin/Login.css"; // reuse same styling
 
 export default function AdminLogin() {
@@ -12,8 +12,8 @@ export default function AdminLogin() {
     e.preventDefault();
 
     try {
-      const res = await axios.post(
-        "https:smart-backends.onrender.com/api/auth/login",
+      const res = await api.post(
+        "/api/auth/login",
         { username, password }
       );
 

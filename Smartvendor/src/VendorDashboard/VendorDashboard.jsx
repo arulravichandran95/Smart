@@ -2,18 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "./VendorDashboard.css";
 
-const api = axios.create({
-  baseURL: "https:smart-backends.onrender.com",
-});
-
-// 🔐 Attach JWT automatically
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+import api from "../api/axiosConfig";
 
 export default function VendorDashboard() {
   const [activeTab, setActiveTab] = useState("submit");
