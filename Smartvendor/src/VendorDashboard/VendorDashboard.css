@@ -172,3 +172,13 @@
   margin-bottom: 20px;
   line-height: 1.5;
 }
+
+.logout-btn {
+  margin-top: auto;
+  background-color: #ff4d4d;
+  color: white;
+}
+
+.logout-btn:hover {
+  background-color: #e60000;
+}

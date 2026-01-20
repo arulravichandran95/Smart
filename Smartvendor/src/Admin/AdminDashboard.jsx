@@ -1,15 +1,24 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./AdminDashboard.css";
 
 import api from "../api/axiosConfig";
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("pending");
   const [pendingList, setPendingList] = useState([]);
   const [approvedList, setApprovedList] = useState([]);
   const [rejectingId, setRejectingId] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
+
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.removeItem("token");
+      navigate("/admin/login");
+    }
+  };
 
   /* ===== ACTIONS ===== */
   const approveRequest = async (id) => {
@@ -70,6 +79,14 @@ export default function AdminDashboard() {
           onClick={() => setActiveTab("approved")}
         >
           Approved Requests
+        </button>
+
+        <button
+          className="admin-btn logout-btn"
+          onClick={handleLogout}
+          style={{ marginTop: "auto", backgroundColor: "#ff4d4d" }}
+        >
+          Logout
         </button>
       </div>
 

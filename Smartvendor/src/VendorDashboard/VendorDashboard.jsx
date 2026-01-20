@@ -1,21 +1,31 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./VendorDashboard.css";
 
 import api from "../api/axiosConfig";
 
 export default function VendorDashboard() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("submit");
 
   const [productName, setProductName] = useState("");
   const [category, setCategory] = useState("");
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [statusList, setStatusList] = useState([]);
   const [historyList, setHistoryList] = useState([]);
   const [editingId, setEditingId] = useState(null);
+
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,6 +35,7 @@ export default function VendorDashboard() {
       category,
       quantity: Number(quantity),
       price: Number(price),
+      phoneNumber,
     };
 
     setIsSubmitting(true);
@@ -52,6 +63,7 @@ export default function VendorDashboard() {
     setCategory("");
     setQuantity("");
     setPrice("");
+    setPhoneNumber("");
     setEditingId(null);
   };
 
@@ -70,6 +82,7 @@ export default function VendorDashboard() {
     setCategory(item.category);
     setQuantity(item.quantity);
     setPrice(item.price);
+    setPhoneNumber(item.phoneNumber || "");
     setEditingId(item.id);
     setActiveTab("submit");
   };
@@ -110,6 +123,10 @@ export default function VendorDashboard() {
           onClick={() => setActiveTab("history")}
         >
           My Submissions
+        </button>
+
+        <button className="sidebar-btn logout-btn" onClick={handleLogout}>
+          Logout
         </button>
       </div>
 
@@ -158,6 +175,15 @@ export default function VendorDashboard() {
               placeholder="Price"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
+              required
+            />
+
+            <input
+              className="vendor-input"
+              type="tel"
+              placeholder="Phone Number for SMS"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
               required
             />
 
