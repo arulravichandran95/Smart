@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axiosConfig";
 import "./Products.css";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    axios
-      .get("https://smart-backends.onrender.com/api/portal/products")
+    api
+      .get("/api/portal/products")
       .then(res => setProducts(res.data))
       .catch(err => console.error(err));
   }, []);
