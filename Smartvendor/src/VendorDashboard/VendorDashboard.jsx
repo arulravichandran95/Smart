@@ -10,7 +10,8 @@ export default function VendorDashboard() {
   const [activeTab, setActiveTab] = useState("submit");
 
   const [productName, setProductName] = useState("");
-  const [category, setCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [customCategory, setCustomCategory] = useState("");
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -27,12 +28,16 @@ export default function VendorDashboard() {
     }
   };
 
+  const CATEGORIES = ["Laptops", "Construction", "Groceries", "Sports Items", "Others"];
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const finalCategory = selectedCategory === "Others" ? customCategory : selectedCategory;
+
     const payload = {
       productName,
-      category,
+      category: finalCategory,
       quantity: Number(quantity),
       price: Number(price),
       phoneNumber,
@@ -60,7 +65,8 @@ export default function VendorDashboard() {
 
   const resetForm = () => {
     setProductName("");
-    setCategory("");
+    setSelectedCategory("");
+    setCustomCategory("");
     setQuantity("");
     setPrice("");
     setPhoneNumber("");
@@ -79,7 +85,15 @@ export default function VendorDashboard() {
 
   const handleEdit = (item) => {
     setProductName(item.productName);
-    setCategory(item.category);
+
+    if (CATEGORIES.includes(item.category)) {
+      setSelectedCategory(item.category);
+      setCustomCategory("");
+    } else {
+      setSelectedCategory("Others");
+      setCustomCategory(item.category);
+    }
+
     setQuantity(item.quantity);
     setPrice(item.price);
     setPhoneNumber(item.phoneNumber || "");
@@ -151,14 +165,28 @@ export default function VendorDashboard() {
               required
             />
 
-            <input
+            <select
               className="vendor-input"
-              type="text"
-              placeholder="Category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
               required
-            />
+            >
+              <option value="" disabled>Select Category</option>
+              {CATEGORIES.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+
+            {selectedCategory === "Others" && (
+              <input
+                className="vendor-input"
+                type="text"
+                placeholder="Type manual category"
+                value={customCategory}
+                onChange={(e) => setCustomCategory(e.target.value)}
+                required
+              />
+            )}
 
             <input
               className="vendor-input"
